@@ -1,31 +1,30 @@
 # myDSAgent
 
-Minimal cross-platform desktop Agent skeleton built with Tauri, React, TypeScript,
-and Rust.
+基于 Tauri、React、TypeScript 和 Rust 构建的极简跨平台桌面 Agent 骨架。
 
-## Version 0 Scope
+## 版本 0 范围
 
-- Tauri v2 desktop shell.
-- React + TypeScript workspace UI.
-- Minimal in-memory Agent Core.
-- Typed Tauri gateway.
-- Rust `health_check` command for bridge verification.
-- No model calls.
-- No shell execution.
-- No filesystem writes.
-- No durable JSONL storage yet.
+- Tauri v2 桌面壳。
+- React + TypeScript 工作区 UI。
+- 最小化内存 Agent Core。
+- 类型化的 Tauri 网关。
+- Rust `health_check` 命令，用于桥接验证。
+- 无模型调用。
+- 无 Shell 执行。
+- 无文件系统写入。
+- 尚未实现持久化 JSONL 存储。
 
-Project rules for AI-assisted development live in `AGENTS.md`.
+AI 辅助开发的项目规则参见 `AGENTS.md`。
 
-## Development
+## 开发
 
-Install dependencies:
+安装依赖：
 
 ```bash
 pnpm install
 ```
 
-Run checks:
+运行检查：
 
 ```bash
 pnpm test
@@ -34,8 +33,8 @@ pnpm build
 PATH="/Users/zzl/.cargo/bin:$PATH" cargo check --manifest-path src-tauri/Cargo.toml
 ```
 
-Run the desktop app:
+运行桌面应用：
 
 ```bash
-PATH="/Users/zzl/.cargo/bin:$PATH" pnpm tauri dev
+pnpm tauri dev
 ```

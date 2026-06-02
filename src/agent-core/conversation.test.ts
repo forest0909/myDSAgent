@@ -9,6 +9,10 @@ describe("conversation state", () => {
 
     expect(state.messages).toHaveLength(1);
     expect(state.messages[0]?.role).toBe("system");
+    expect(state.messages[0]?.content).toBe(
+      "Agent 外壳已就绪。v0 不会调用模型，也不会启用本地工具。",
+    );
+    expect(state.meta.title).toBe("本地 Agent 外壳");
     expect(next.messages).toHaveLength(2);
     expect(next.messages[1]).toMatchObject({
       conversationId: "conv_test",

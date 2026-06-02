@@ -1,13 +1,23 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import {
   createConversationState,
   sendUserMessage,
 } from "./agent-core/conversation";
-import type { AgentStatus } from "./agent-core/types";
+import type { AgentRole, AgentStatus } from "./agent-core/types";
 import { getExecutorStatus } from "./agent-core/executor";
 import { getModelStatus } from "./agent-core/llm-client";
 import { healthCheck } from "./platform/tauri-gateway";
+import ChatPanel from "./components/ChatPanel";
+import Sidebar from "./components/Sidebar";
+import StatusPanel from "./components/StatusPanel";
+
+const roleLabels: Record<AgentRole, string> = {
+  system: "系统",
+  user: "用户",
+  assistant: "助手",
+  tool: "工具",
+};
 
 function App() {
   const [conversation, setConversation] = useState(() =>
@@ -48,7 +58,11 @@ function App() {
         count: conversation.meta.messageCount,
       },
     ],
-    [conversation.meta.id, conversation.meta.messageCount, conversation.meta.title],
+    [
+      conversation.meta.id,
+      conversation.meta.messageCount,
+      conversation.meta.title,
+    ],
   );
 
   function handleNewChat() {
@@ -56,7 +70,7 @@ function App() {
     setDraft("");
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setConversation((current) => sendUserMessage(current, draft));
     setDraft("");
@@ -64,94 +78,16 @@ function App() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar" aria-label="Conversation list">
-        <div className="brand">
-          <span className="brand-mark">A</span>
-          <div>
-            <strong>Agent Demo</strong>
-            <span>Desktop skeleton</span>
-          </div>
-        </div>
-        <button className="new-chat-button" type="button" onClick={handleNewChat}>
-          New Chat
-        </button>
-        <div className="session-list">
-          {sessions.map((session) => (
-            <button className="session-item active" type="button" key={session.id}>
-              <span>{session.title}</span>
-              <small>{session.count} messages</small>
-            </button>
-          ))}
-        </div>
-      </aside>
-
-      <section className="chat-panel" aria-label="Agent conversation">
-        <header className="chat-header">
-          <div>
-            <h1>Desktop Agent Workspace</h1>
-            <p>Minimal runtime shell. Model calls and tools are disabled.</p>
-          </div>
-        </header>
-
-        <div className="message-list" aria-live="polite">
-          {conversation.messages.map((message) => (
-            <article className={`message ${message.role}`} key={message.id}>
-              <span className="message-role">{message.role}</span>
-              <p>{message.content}</p>
-            </article>
-          ))}
-        </div>
-
-        <form className="composer" onSubmit={handleSubmit}>
-          <label className="sr-only" htmlFor="message-input">
-            Message
-          </label>
-          <input
-            id="message-input"
-            value={draft}
-            onChange={(event) => setDraft(event.currentTarget.value)}
-            placeholder="Type a message for the local conversation..."
-          />
-          <button type="submit" disabled={!draft.trim()}>
-            Send
-          </button>
-        </form>
-      </section>
-
-      <aside className="status-panel" aria-label="Runtime status">
-        <h2>Runtime Status</h2>
-        <StatusRow
-          label="Desktop"
-          value={
-            agentStatus.desktop === "ready"
-              ? "Desktop Ready"
-              : agentStatus.desktop === "checking"
-                ? "Checking Bridge"
-                : "Bridge Unavailable"
-          }
-          tone={agentStatus.desktop === "ready" ? "ready" : "muted"}
-        />
-        <StatusRow label="Agent Core" value="Agent Core Idle" tone="ready" />
-        <StatusRow label="Model" value="Model Disabled" tone="muted" />
-        <StatusRow label="Planner" value="Planner Stub" tone="muted" />
-        <StatusRow label="Executor" value="Executor Stub" tone="muted" />
-      </aside>
+      <Sidebar sessions={sessions} onNewChat={handleNewChat} />
+      <ChatPanel
+        messages={conversation.messages}
+        roleLabels={roleLabels}
+        draft={draft}
+        onDraftChange={setDraft}
+        onSubmit={handleSubmit}
+      />
+      <StatusPanel agentStatus={agentStatus} />
     </main>
-  );
-}
-
-interface StatusRowProps {
-  label: string;
-  value: string;
-  tone: "ready" | "muted";
-}
-
-function StatusRow({ label, value, tone }: StatusRowProps) {
-  return (
-    <div className="status-row">
-      <span>{label}</span>
-      <strong className={tone}>{value}</strong>
-    </div>
   );
 }
 

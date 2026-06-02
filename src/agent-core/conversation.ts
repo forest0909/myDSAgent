@@ -1,7 +1,7 @@
 import type { AgentMessage, ConversationState } from "./types";
 
 const welcomeMessage =
-  "Agent shell is ready. Model calls and local tools are disabled in v0.";
+  "Agent 外壳已就绪。v0 不会调用模型，也不会启用本地工具。";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -27,7 +27,7 @@ export function createConversationState(
   return {
     meta: {
       id: conversationId,
-      title: "Local Agent Shell",
+      title: "本地 Agent 外壳",
       createdAt,
       updatedAt: createdAt,
       messageCount: 1,
