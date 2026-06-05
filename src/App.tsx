@@ -4,7 +4,7 @@ import {
   createConversationState,
   sendUserMessage,
 } from "./agent-core/conversation";
-import type { AgentRole, AgentStatus } from "./agent-core/types";
+import type { AgentRole, AgentStatus, ModelConfig } from "./agent-core/types";
 import { getExecutorStatus } from "./agent-core/executor";
 import { getModelStatus } from "./agent-core/llm-client";
 import { healthCheck } from "./platform/tauri-gateway";
@@ -19,11 +19,20 @@ const roleLabels: Record<AgentRole, string> = {
   tool: "工具",
 };
 
+// baseUrl 填 API 主机地址（不含 /v1），代码内部拼接 /v1/chat/completions
+const modelConfig: ModelConfig = {
+  provider: "openai",
+  model: import.meta.env.VITE_MODEL_NAME || "qwen2.5:latest",
+  apiKey: import.meta.env.VITE_MODEL_API_KEY || "ollama",
+  baseUrl: import.meta.env.VITE_MODEL_BASE_URL || "http://localhost:11434",
+};
+
 function App() {
   const [conversation, setConversation] = useState(() =>
     createConversationState(),
   );
   const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(false);
   const [agentStatus, setAgentStatus] = useState<AgentStatus>({
     desktop: "checking",
     core: getExecutorStatus(),
@@ -70,10 +79,17 @@ function App() {
     setDraft("");
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setConversation((current) => sendUserMessage(current, draft));
+    if (loading || !draft.trim()) return;
+
+    const userInput = draft;
     setDraft("");
+    setLoading(true);
+
+    const next = await sendUserMessage(conversation, userInput, modelConfig);
+    setConversation(next);
+    setLoading(false);
   }
 
   return (

@@ -26,11 +26,18 @@ export interface ConversationState {
 export interface AgentStatus {
   desktop: "checking" | "ready" | "unavailable";
   core: "idle";
-  model: "disabled";
+  model: "disabled" | "configured";
 }
 
 export interface HealthCheckResult {
   ok: boolean;
   app: "agent-demo";
   reason?: "tauri-bridge-unavailable" | "tauri-command-failed";
+}
+
+export interface ModelConfig {
+  provider: "openai";
+  model: string;
+  apiKey: string;
+  baseUrl: string;
 }
